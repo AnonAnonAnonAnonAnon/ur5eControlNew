@@ -1,0 +1,1 @@
+savedcmd_/home/cyt/ur5eControl/CH341SER_LINUX/driver/modules.order := {   echo /home/cyt/ur5eControl/CH341SER_LINUX/driver/ch341.o; :; } > /home/cyt/ur5eControl/CH341SER_LINUX/driver/modules.order

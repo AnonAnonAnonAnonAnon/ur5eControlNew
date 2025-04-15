@@ -1,0 +1,1 @@
+savedcmd_/home/cyt/ur5eControl/CH341SER_LINUX_download/CH341SER_LINUX/driver/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/cyt/ur5eControl/CH341SER_LINUX_download/CH341SER_LINUX/driver/Module.symvers -T /home/cyt/ur5eControl/CH341SER_LINUX_download/CH341SER_LINUX/driver/modules.order -i Module.symvers -e 

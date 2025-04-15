@@ -1,0 +1,16 @@
+
+最简单DEMO:
+    准备：
+        polyscope:远程控制
+        注意：夹爪接线
+    运行：
+        sudo /home/cyt/anaconda3/envs/ur5econtrol/bin/python /home/cyt/ur5eControl/test1.py
+
+warmup
+    准备：
+        将/home/cyt/ur5eControl/Servoj_RTDE_UR5/polyscope/translation_sample_servoj.urp文件导入polyscope
+        polyscope：本地控制
+    运行：
+        启动顺序：运行该py-》运行urp-》点击继续
+        /home/cyt/anaconda3/envs/ur5econtrol/bin/python /home/cyt/ur5eControl/warmup.py
+
