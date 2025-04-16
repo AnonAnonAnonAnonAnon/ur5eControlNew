@@ -21,9 +21,13 @@ def main():
     mySocket.connect((host, port))
     # print(mySocket.recv(4096).decode())
 
-    # ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-    ser = serial.Serial('/dev/ttyCH341USB0',9600,timeout=1)
+    # 夹爪
+    # 取决于具体串口 
+    # ls /dev
+    ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+    # ser = serial.Serial('/dev/ttyCH341USB0',9600,timeout=1)
     # ser = serial.Serial('/dev/ttyCH341USB1',9600,timeout=1)
+
     time.sleep(2)
     motor_open_list = (0x02,0x00,0x20,0x2f,0x00,0,0xa4) #机械爪松开(具体解释见机械爪用户手册)
     motor_close_list = (0x02,0x01,0x20,0x2f,0x00,0,0xa4)    #机械爪闭合，45字节是角度

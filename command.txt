@@ -2,9 +2,12 @@
 最简单DEMO:
     准备：
         polyscope:远程控制
-        注意：夹爪接线
-    运行：
+        ip：polyscope上查看
+        夹爪：是否接线，以及对应的串口字符
+            ls /dev 查看
+    运行：(根据具体电脑)（r7000p）(pc2)
         sudo /home/cyt/anaconda3/envs/ur5econtrol/bin/python /home/cyt/ur5eControl/test1.py
+        sudo /home/ur5/anaconda3/envs/rekep4real/bin/python /home/ur5/ur5Control/UR5e_Control/test1.py
 
 warmup
     准备：
