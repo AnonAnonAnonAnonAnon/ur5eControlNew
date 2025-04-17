@@ -114,10 +114,12 @@ class RobotEnvironment(Visualizer, MotorController):
                            color=(255,255,0),
                            thickness=2)
 
+            # 添加：显示当前机械臂的末端旋转，rx, ry, rz，显示到小数点后3位
             # show states
             if self.all_state_ready:
                 self.state_message = [f'gripper_state: {self["gripper_state"]}',
                                       f'x, y, z: {self["x"]:.2f}, {self["y"]:.2f}, {self["z"]:.2f}',
+                                      f'rx, ry, rz: {self["rx"]:.3f}, {self["ry"]:.3f}, {self["rz"]:.3f}',# 显示末端旋转，rx, ry, rz，显示到小数点后3位
                                       f'tip_x, tip_y, tip_z: {self["tip_direction_x"]:.2f}, {self["tip_direction_y"]:.2f}, {self["tip_direction_z"]:.2f}',
                                       f'j1, j2, j3: {self["joint_positions_j1"]:.2f}, {self["joint_positions_j2"]:.2f}, {self["joint_positions_j3"]:.2f}',
                                       f'j4, j5, j6: {self["joint_positions_j4"]:.2f}, {self["joint_positions_j5"]:.2f}, {self["joint_positions_j6"]:.2f}']
@@ -499,7 +501,20 @@ class RobotEnvironment(Visualizer, MotorController):
 
         self.all_state_ready = True
 
-    def script(self):
+
+    def script_grasp_one_toy_on_box(self,toy_x,toy_y,box_x,box_y):
+        
+        #################################################填写
+        # 注意，是负值，单位是米
+        # 盒子的位置，桌子坐标系
+        # 标定点位置： -0.56 -0.51 0.66 -0.21
+        target_position_x_1_desk = box_x
+        target_position_y_1_desk = box_y
+        # 玩具的位置，桌子坐标系
+        object_position_x_1_desk = toy_x
+        object_position_y_1_desk = toy_y 
+        #################################################填写
+
         # warm up the robot
         self.__warm_up()
 
@@ -507,30 +522,46 @@ class RobotEnvironment(Visualizer, MotorController):
         starting_pose = self.__get_tcp_pose()
         print('starting_pose:', starting_pose)
 
-        # object position
-        object_position_x = -0.5850
-        object_position_y = -0.0465
-        target_position_x = -0.3605
-        target_position_y = -0.3065
-        z_middle = 0.26
-        z_bottom = 0.20
-        z_top = 0.31
+        #3个高度
+        z_middle_1 = 0.26
+        z_bottom_1 = 0.20
+        z_top_1 = 0.35
+        z_toptop = 0.4
 
+        #机器人坐标系和桌子坐标系之间的偏移
+        delta_x = 0.1595
+        delta_y = 0.1235
+
+        # 目标放置位置，机器人坐标系
+        target_position_x_1 = target_position_x_1_desk + delta_x
+        target_position_y_1 = target_position_y_1_desk + delta_y
+
+        # 目标抓取位置 ，机器人坐标系
+        object_position_x_1 = object_position_x_1_desk + delta_x
+        object_position_y_1 = object_position_y_1_desk + delta_y
+
+        # 目标位姿序列
         # destination poses
         fixed_rotation = starting_pose[3:]
-        dest_pose_1 = [object_position_x, object_position_y, z_middle] + fixed_rotation
-        dest_pose_2 = [object_position_x, object_position_y, z_bottom] + fixed_rotation
-        dest_pose_3 = [target_position_x, target_position_y, z_top] + fixed_rotation
-        dest_pose_4 = [target_position_x, target_position_y, z_middle] + fixed_rotation
+        dest_pose_1_1 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_2 = [object_position_x_1, object_position_y_1, z_bottom_1] + fixed_rotation
+        dest_pose_1_3 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_4 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
+        dest_pose_1_5 = [target_position_x_1, target_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_6 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
 
+        # 控制移动
         # move to the destination poses
-        self.__move_to_pose(dest_pose_1, 3)
-        self.__move_to_pose(dest_pose_2, 1)
+        self.__move_to_pose(dest_pose_1_1, 6)
+        self.__move_to_pose(dest_pose_1_2, 2)
         self.__grasp()
-        self.__move_to_pose(dest_pose_3, 3)
-        self.__move_to_pose(dest_pose_4, 1)
+        self.__move_to_pose(dest_pose_1_3, 6)
+        self.__move_to_pose(dest_pose_1_4, 2)
+        self.__move_to_pose(dest_pose_1_5, 2)
         self.__open()
+        self.__move_to_pose(dest_pose_1_6, 2)
 
+        # 回到初始位置
         # move back to the starting pose
         self.__move_to_pose(starting_pose, 3)
 
@@ -548,7 +579,6 @@ class RobotEnvironment(Visualizer, MotorController):
         z_bottom_1 = 0.20
         z_top_1 = 0.35
         z_toptop = 0.4
-
 
         #机器人坐标系和桌子坐标系之间的偏移
         delta_x = 0.1595
@@ -715,15 +745,83 @@ class RobotEnvironment(Visualizer, MotorController):
         self.__move_to_pose(starting_pose, 3)
 
 
+    def script_grasp_one_toy_on_box(self,toy_x,toy_y,box_x,box_y):
+        
+        #################################################填写
+        # 注意，是负值，单位是米
+        # 盒子的位置，桌子坐标系
+        # 标定点位置： -0.56 -0.51 0.66 -0.21
+        target_position_x_1_desk = box_x
+        target_position_y_1_desk = box_y
+        # 玩具的位置，桌子坐标系
+        object_position_x_1_desk = toy_x
+        object_position_y_1_desk = toy_y 
+        #################################################填写
+
+        # warm up the robot
+        self.__warm_up()
+
+        # get current pose
+        starting_pose = self.__get_tcp_pose()
+        print('starting_pose:', starting_pose)
+
+        #3个高度
+        z_middle_1 = 0.26
+        z_bottom_1 = 0.20
+        z_top_1 = 0.35
+        z_toptop = 0.4
+
+        #机器人坐标系和桌子坐标系之间的偏移
+        delta_x = 0.1595
+        delta_y = 0.1235
+
+        # 目标放置位置，机器人坐标系
+        target_position_x_1 = target_position_x_1_desk + delta_x
+        target_position_y_1 = target_position_y_1_desk + delta_y
+
+        # 目标抓取位置 ，机器人坐标系
+        object_position_x_1 = object_position_x_1_desk + delta_x
+        object_position_y_1 = object_position_y_1_desk + delta_y
+
+        # 目标位姿序列
+        # destination poses
+        fixed_rotation = starting_pose[3:]
+        dest_pose_1_1 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_2 = [object_position_x_1, object_position_y_1, z_bottom_1] + fixed_rotation
+        dest_pose_1_3 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_4 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
+        dest_pose_1_5 = [target_position_x_1, target_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_6 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
+
+        # 控制移动
+        # move to the destination poses
+        self.__move_to_pose(dest_pose_1_1, 6)
+        self.__move_to_pose(dest_pose_1_2, 2)
+        self.__grasp()
+        self.__move_to_pose(dest_pose_1_3, 6)
+        self.__move_to_pose(dest_pose_1_4, 2)
+        self.__move_to_pose(dest_pose_1_5, 2)
+        self.__open()
+        self.__move_to_pose(dest_pose_1_6, 2)
+
+        # 回到初始位置
+        # move back to the starting pose
+        self.__move_to_pose(starting_pose, 3)
+
+
+
 if __name__ == '__main__':
     robot_environment = RobotEnvironment(pc_id=2)
 
     # 可视化界面
-    robot_environment.run_loop()
+    # robot_environment.run_loop()
     # 键盘控制移动
 
     # 电影
-    # robot_environment.script()
+    # robot_environment.script_grasp_one_toy_on_box()
     # robot_environment.script_grasp_six_toy()
     
+
+
+
 

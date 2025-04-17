@@ -1,0 +1,7 @@
+
+任务：抓一个玩具放到盒子上
+前提：已经warmup。（见【键盘控制流程】）
+参数：movie_script.py中输入参数：玩具位置，盒子位置（标定点位置： -0.56 -0.51 0.66 -0.21）
+运行：/home/ur5/anaconda3/envs/rekep4real/bin/python /home/ur5/ur5Control/UR5e_Control/RobotEnvironment/movie_script.py
+
+

@@ -1,6 +1,7 @@
 
 （pc2上）（注意，这里额外需要安装的包未知，包括Realsense等）
 准备：polyscope打开，切换到本地控制，加载translation_sample_servoj.urp
+调用：robot_environment.py的main方法应该在机器人初始化后调用robot_environment.run_loop()
 运行：/home/ur5/anaconda3/envs/rekep4real/bin/python /home/ur5/ur5Control/UR5e_Control/RobotEnvironment/robot_environment.py
 等待可视化窗口加载完成
 warmup：
@@ -8,6 +9,8 @@ warmup：
     polyscope:运行translation_sample_servoj.urp，点击继续
     终端提示连接成功
 控制：根据可视化窗口左侧的提示
+退出：鼠标焦点在终端，ctrl+c
+
 
 
 
