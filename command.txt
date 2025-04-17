@@ -1,5 +1,5 @@
 
-最简单DEMO:
+最简单的夹取DEMO:
     准备：
         polyscope:远程控制
         ip：polyscope上查看
@@ -9,11 +9,12 @@
         sudo /home/cyt/anaconda3/envs/ur5econtrol/bin/python /home/cyt/ur5eControl/test1.py
         sudo /home/ur5/anaconda3/envs/rekep4real/bin/python /home/ur5/ur5Control/UR5e_Control/test1.py
 
-warmup
+warmup，启动本地urp：
     准备：
-        将/home/cyt/ur5eControl/Servoj_RTDE_UR5/polyscope/translation_sample_servoj.urp文件导入polyscope
+        将translation_sample_servoj.urp文件导入polyscope
         polyscope：本地控制
-    运行：
-        启动顺序：运行该py-》运行urp-》点击继续
+    运行：(根据具体电脑)（r7000p）(pc2)
+        启动顺序：运行该warmup.py-》运行urp-》点击继续
         /home/cyt/anaconda3/envs/ur5econtrol/bin/python /home/cyt/ur5eControl/warmup.py
+        /home/ur5/anaconda3/envs/rekep4real/bin/python /home/ur5/ur5Control/UR5e_Control/warmup.py
 
