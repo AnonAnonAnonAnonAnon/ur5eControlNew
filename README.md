@@ -1,6 +1,6 @@
 Bottom-up build environments and processes
 
-Experimental logs：https://mcneznd3g628.feishu.cn/wiki/CK2owvomviE1hekPocAcPrHtnsg?from=from_copylink
+Our last run-oriented build project ： https://github.com/ElementForever2022/ReKepUR5_from_kinova
 
 Contact: QQ1842710211
 
