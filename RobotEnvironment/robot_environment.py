@@ -26,6 +26,15 @@ import Servoj_RTDE_UR5.rtde.rtde as rtde
 import Servoj_RTDE_UR5.rtde.rtde_config as rtde_config
 from Servoj_RTDE_UR5.min_jerk_planner_translation import PathPlanTranslation
 
+#导入gdino
+from rekep.perception.gdino import GroundingDINO
+#导入photo.py中的photo_shot方法
+from photo import photo_shot
+#导入cv2
+import cv2
+#导入main_vision.py中的get_keypoints_from_rekep方法
+from main_vision import get_keypoints_from_rekep
+
 
 manual_control_time = 0.3 # the time of the manual control trjectory
 
@@ -105,6 +114,7 @@ class RobotEnvironment(Visualizer, MotorController):
         self.state_message_postion = (self.width_left // 7, self.height//10)
 
         while self.keep_alive:
+            # 这里是对相机对象的调用，拍摄RGB图片
             self.set_screen_middle(self.camera.get_color_image())
 
             # show keys
@@ -867,6 +877,127 @@ class RobotEnvironment(Visualizer, MotorController):
         # 回到初始位置
         # move back to the starting pose
         self.__move_to_pose(starting_pose, 5)
+
+
+    def Script_Grasp_ToyBox_Vision(self,obj,box_x,box_y):
+        #添加main_vision.py中的gdino提取物体位置功能，提取玩具，在转换机器人坐标系
+
+        data_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data'
+        frame_number = 0
+        keypoints = get_keypoints_from_rekep(obj,data_path,frame_number)
+        print(f"Debug: Keypoints: {keypoints}")
+        # # 拍照
+        # rgb_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data/color_000000.png'
+        # depth_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data/depth_000000.png'
+        # color_image = self.camera.get_color_image()
+        # depth_image = self.camera.get_depth_image()
+        # cv2.imwrite(rgb_path, color_image)
+        # cv2.imwrite(depth_path, depth_image)
+
+        # # 调用gdino提取对应物体的检测框
+        # gdino = GroundingDINO()
+        # results = gdino.detect_objects(rgb_path, obj)
+
+        # # 打印results
+        # print(f"Debug: Results: {results}")
+
+        # #将检测框绘制到图片上
+        # output_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data/color_000000_with_boxes.png'
+        # img = cv2.imread(rgb_path)  
+        # for idx, obj in enumerate(results["objects"]):
+        #     # 获取 bbox，并转换成整数像素
+        #     x1, y1, x2, y2 = map(int, obj["bbox"])
+        #     label = obj["category"]
+        #     score = obj["score"]
+        #     # 第一个框红色，其余绿色
+        #     box_color = (0, 0, 255) if idx == 0 else (0, 255, 0)
+        #     # 画矩形框
+        #     cv2.rectangle(img, (x1, y1), (x2, y2), box_color, 2)
+        #     # 在框上方写 “类别:置信度”，字体大小 0.5，线宽 1
+        #     text = f"{label}: {score:.2f}"
+        #     cv2.putText(
+        #         img, text,
+        #         (x1, y1 - 5),
+        #         cv2.FONT_HERSHEY_SIMPLEX,
+        #         0.5,               # 字体大小
+        #         box_color,       # 字体颜色
+        #         1,                 # 线宽
+        #         cv2.LINE_AA
+        #     )
+        # cv2.imwrite(output_path, img)
+        # print(f"已将带框结果保存到：{output_path}")
+
+        # # 提取检测框中心点
+        # # 假设 results 已经拿到
+        # if results["objects"]:
+        #     x1, y1, x2, y2 = results["objects"][0]["bbox"]
+        #     cx = (x1 + x2) / 2
+        #     cy = (y1 + y2) / 2
+        #     print(f"第一个目标的中心点：({cx:.2f}, {cy:.2f})")
+        # else:
+        #     print("没有检测到任何目标")
+
+
+        #暂停
+        input('Press Enter to continue...')
+
+
+        target_position_x_1_desk = box_x
+        target_position_y_1_desk = box_y
+        # 玩具的位置，桌子坐标系
+        object_position_x_1_desk = toy_x
+        object_position_y_1_desk = toy_y 
+
+
+        # warm up the robot
+        self.__warm_up()
+
+        # get current pose
+        starting_pose = self.__get_tcp_pose()
+        print('starting_pose:', starting_pose)
+
+        #3个高度
+        z_middle_1 = 0.26
+        z_bottom_1 = 0.20
+        z_top_1 = 0.35
+        z_toptop = 0.4
+
+        #机器人坐标系和桌子坐标系之间的偏移
+        delta_x = 0.1595
+        delta_y = 0.1235
+
+        # 目标放置位置，机器人坐标系
+        target_position_x_1 = target_position_x_1_desk + delta_x
+        target_position_y_1 = target_position_y_1_desk + delta_y
+
+        # 目标抓取位置 ，机器人坐标系
+        object_position_x_1 = object_position_x_1_desk + delta_x
+        object_position_y_1 = object_position_y_1_desk + delta_y
+
+        # 目标位姿序列
+        # destination poses
+        fixed_rotation = starting_pose[3:]
+        dest_pose_1_1 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_2 = [object_position_x_1, object_position_y_1, z_bottom_1] + fixed_rotation
+        dest_pose_1_3 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_4 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
+        dest_pose_1_5 = [target_position_x_1, target_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_6 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
+
+        # 控制移动
+        # move to the destination poses
+        self.__move_to_pose(dest_pose_1_1, 6)
+        self.__move_to_pose(dest_pose_1_2, 2)
+        self.__grasp()
+        self.__move_to_pose(dest_pose_1_3, 6)
+        self.__move_to_pose(dest_pose_1_4, 2)
+        self.__move_to_pose(dest_pose_1_5, 2)
+        self.__open()
+        self.__move_to_pose(dest_pose_1_6, 2)
+
+        # 回到初始位置
+        # move back to the starting pose
+        self.__move_to_pose(starting_pose, 3)
 
 
 

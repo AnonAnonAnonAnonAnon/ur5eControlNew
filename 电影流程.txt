@@ -17,6 +17,12 @@
         旋转模式:  1:瓶子朝向x- 2:瓶子朝向y- 3:瓶子朝向x-y- 4:瓶子朝向x-60y-30 （目前只有14正常工作）
 运行：/home/ur5/anaconda3/envs/rekep4real/bin/python /home/ur5/ur5Control/UR5e_Control/RobotEnvironment/movie_script.py
 
+任务：抓一个玩具放到盒子上，视觉检测
+准备：
+    调用：movie_script.py中解除注释：Script_Grasp_ToyBox_Vision
+    参数：（movie_script.py中）
+        物体名称，盒子位置（标定点位置：0.66 -0.21）
+
 
 
 
