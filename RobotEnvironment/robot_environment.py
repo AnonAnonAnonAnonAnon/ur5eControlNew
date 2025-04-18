@@ -745,7 +745,7 @@ class RobotEnvironment(Visualizer, MotorController):
         self.__move_to_pose(starting_pose, 3)
 
 
-    def Script_BottleBox_GraspRotatePlace(self,toy_x,toy_y,box_x,box_y):
+    def Script_BottleBox_GraspRotatePlace(self,toy_x,toy_y,box_x,box_y,rotate_mode):
         
         ####################### 传入参数 ##########################
         # 注意，是负值，单位是米
@@ -781,6 +781,15 @@ class RobotEnvironment(Visualizer, MotorController):
         # 可调整值：机械臂不可达的高度
         unreachable_height = 0.24
 
+        # 固定的朝向值
+        x_neg = [1.369,-1.033,-1.392]
+        y_neg = [1.366,-1.062,0.999]
+        x_y_neg = [1.275,-0.900,-0.273]
+        x_60_y_30_neg = [1.246,-0.954,0.213]
+
+        # 后退距离
+        back_distance = 0.09
+
         ####################### 坐标换算 ##########################
         # 目标放置位置，机器人坐标系下
         target_position_x_1 = target_position_x_1_desk + delta_x
@@ -793,18 +802,56 @@ class RobotEnvironment(Visualizer, MotorController):
         ####################### 旋转 ##########################
         # 初始位姿的旋转
         fixed_rotation = starting_pose[3:]
-        x_neg = [1.369,-1.033,-1.392]
-        y_neg = [1.366,-1.062,0.999]#未测试
 
+        # 旋转模式
+        # 1:瓶子朝向x- 2:瓶子朝向y- 
+        if rotate_mode == 1:
+            target_rotation = x_neg
+        elif rotate_mode == 2:
+            target_rotation = y_neg
+        elif rotate_mode == 3:
+            target_rotation = x_y_neg
+        elif rotate_mode == 4:
+            target_rotation = x_60_y_30_neg
+
+        ####################### 爪子长度导致的平面偏置 ##########################
+        if rotate_mode == 1:
+            target_position_x_1 = target_position_x_1+gripper_length
+        elif rotate_mode == 2:
+            target_position_y_1 = target_position_y_1+gripper_length
+        elif rotate_mode == 3:
+            # 除以根号2
+            target_position_x_1 = target_position_x_1+gripper_length/np.sqrt(2)
+            target_position_y_1 = target_position_y_1+gripper_length/np.sqrt(2)
+        elif rotate_mode == 4:
+            target_position_x_1 = target_position_x_1+gripper_length/2
+            target_position_y_1 = target_position_y_1+gripper_length*np.sqrt(3)/2
+
+        ####################### 后退 ##########################
+        # 后退距离
+        # 放完瓶子后，后退，避免碰到瓶子
+        if rotate_mode == 1:
+            target_position_x_1_after_back = target_position_x_1+back_distance
+            target_position_y_1_after_back = target_position_y_1
+        elif rotate_mode == 2:
+            target_position_x_1_after_back = target_position_x_1
+            target_position_y_1_after_back = target_position_y_1+back_distance
+        elif rotate_mode == 3:
+            target_position_x_1_after_back = target_position_x_1+back_distance/np.sqrt(2)
+            target_position_y_1_after_back = target_position_y_1+back_distance/np.sqrt(2)
+        elif rotate_mode == 4:
+            target_position_x_1_after_back = target_position_x_1+back_distance/2
+            target_position_y_1_after_back = target_position_y_1+back_distance*np.sqrt(3)/2
 
         ####################### 动作序列 ##########################
         # destination poses
         dest_pose_1_1 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
         dest_pose_1_2 = [object_position_x_1, object_position_y_1, z_bottom_1] + fixed_rotation
         dest_pose_1_3 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
-        dest_pose_1_4 = [target_position_x_1+gripper_length, target_position_y_1, z_top_1] + x_neg
-        dest_pose_1_5 = [target_position_x_1+gripper_length, target_position_y_1, unreachable_height] + x_neg
-        dest_pose_1_6 = [target_position_x_1+gripper_length, target_position_y_1, z_top_1] + fixed_rotation
+        dest_pose_1_4 = [target_position_x_1, target_position_y_1, z_top_1] + target_rotation
+        dest_pose_1_5 = [target_position_x_1, target_position_y_1, unreachable_height] + target_rotation
+        dest_pose_1_6 = [target_position_x_1_after_back, target_position_y_1_after_back, unreachable_height] + target_rotation
+        dest_pose_1_7 = [target_position_x_1_after_back, target_position_y_1_after_back, z_top_1] + fixed_rotation
 
         ####################### 控制移动 ##########################
         # move to the destination poses
@@ -816,7 +863,7 @@ class RobotEnvironment(Visualizer, MotorController):
         self.__move_to_pose(dest_pose_1_5, 5)
         self.__open()
         self.__move_to_pose(dest_pose_1_6, 5)
-
+        self.__move_to_pose(dest_pose_1_7, 5)
         # 回到初始位置
         # move back to the starting pose
         self.__move_to_pose(starting_pose, 5)

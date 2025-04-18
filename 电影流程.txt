@@ -8,13 +8,21 @@
 
 任务：抓瓶子并摆正到盒子上
 准备：
-    warmup。（见【键盘控制流程】）
-    瓶子朝向x-
     机械臂[手腕3]关节角度为180°
     机械臂朝向大致为竖直向下，大致为[2.463,-1.914,0.027]（pc2上）（注意，这里的rx应该为正值，ry应该为负值）
+    warmup。（见【键盘控制流程】）
     调用：movie_script.py中解除注释：Script_BottleBox_GraspRotatePlace
-    参数：movie_script.py中输入参数：瓶子位置，盒子位置（标定点位置： -0.56 -0.51 0.66 -0.21）
+    参数：（movie_script.py中）
+        瓶子位置，盒子位置（标定点位置： -0.56 -0.51 0.66 -0.21）
+        旋转模式:  1:瓶子朝向x- 2:瓶子朝向y- 3:瓶子朝向x-y- 4:瓶子朝向x-60y-30 （目前只有14正常工作）
 运行：/home/ur5/anaconda3/envs/rekep4real/bin/python /home/ur5/ur5Control/UR5e_Control/RobotEnvironment/movie_script.py
+
+
+
+
+
+
+
 
 
 
