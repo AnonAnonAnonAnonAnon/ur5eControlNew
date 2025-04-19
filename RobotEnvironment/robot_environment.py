@@ -34,6 +34,11 @@ from photo import photo_shot
 import cv2
 #导入main_vision.py中的get_keypoints_from_rekep方法
 from main_vision import get_keypoints_from_rekep
+# 导入R
+from scipy.spatial.transform import Rotation as R
+# 导入json
+import json
+
 
 
 manual_control_time = 0.3 # the time of the manual control trjectory
@@ -511,6 +516,38 @@ class RobotEnvironment(Visualizer, MotorController):
 
         self.all_state_ready = True
 
+    def pose7d_world2robot_from_rekep(self,pose7d):
+
+            """
+            将[x,y,z,quat]从世界/相机坐标系转换为机器人坐标系
+            """
+            # vec2mat
+            xyz = pose7d[0:3]
+            orientation_quat = pose7d[3:]
+            mat_pose_world = np.eye(4)
+            mat_pose_world[:3,3] = xyz
+            mat_pose_world[:3,:3] = R.from_quat(orientation_quat).as_matrix()
+
+            # transformation matrix
+
+            # 从配置文件中获取坐标系变换矩阵
+            with open('/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/auto_callibration.json', 'r') as f:
+                robot_state = json.load(f)
+                # 获取坐标系变换矩阵
+                mat_world2robot = np.array(robot_state['misc']['world2robot_homo']) # 从世界坐标系(cam)变换到机器人坐标系(base)
+
+            print(f"DEBUG: mat_world2robot_read_when_transform: {mat_world2robot}")
+
+            transformation_matrix = mat_world2robot
+
+            #转换
+            mat_pose_robot = transformation_matrix@mat_pose_world
+
+            # mat2vec
+            robot_xyz = mat_pose_robot[:3,3]
+            robot_quat = R.from_matrix(mat_pose_robot[:3,:3]).as_quat()
+            robot_pose7d = np.hstack((robot_xyz, robot_quat))
+            return robot_pose7d
 
     def script_grasp_one_toy_on_box(self,toy_x,toy_y,box_x,box_y):
         
@@ -562,14 +599,14 @@ class RobotEnvironment(Visualizer, MotorController):
 
         # 控制移动
         # move to the destination poses
-        self.__move_to_pose(dest_pose_1_1, 6)
-        self.__move_to_pose(dest_pose_1_2, 2)
+        self.__move_to_pose(dest_pose_1_1, 5)
+        self.__move_to_pose(dest_pose_1_2, 5)
         self.__grasp()
-        self.__move_to_pose(dest_pose_1_3, 6)
-        self.__move_to_pose(dest_pose_1_4, 2)
-        self.__move_to_pose(dest_pose_1_5, 2)
+        self.__move_to_pose(dest_pose_1_3, 5)
+        self.__move_to_pose(dest_pose_1_4, 5)
+        self.__move_to_pose(dest_pose_1_5, 5)
         self.__open()
-        self.__move_to_pose(dest_pose_1_6, 2)
+        self.__move_to_pose(dest_pose_1_6, 5)
 
         # 回到初始位置
         # move back to the starting pose
@@ -882,122 +919,37 @@ class RobotEnvironment(Visualizer, MotorController):
     def Script_Grasp_ToyBox_Vision(self,obj,box_x,box_y):
         #添加main_vision.py中的gdino提取物体位置功能，提取玩具，在转换机器人坐标系
 
+        ####################### 关键点提取 ##########################
         data_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data'
         frame_number = 0
         keypoints = get_keypoints_from_rekep(obj,data_path,frame_number)
         print(f"Debug: Keypoints: {keypoints}")
-        # # 拍照
-        # rgb_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data/color_000000.png'
-        # depth_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data/depth_000000.png'
-        # color_image = self.camera.get_color_image()
-        # depth_image = self.camera.get_depth_image()
-        # cv2.imwrite(rgb_path, color_image)
-        # cv2.imwrite(depth_path, depth_image)
-
-        # # 调用gdino提取对应物体的检测框
-        # gdino = GroundingDINO()
-        # results = gdino.detect_objects(rgb_path, obj)
-
-        # # 打印results
-        # print(f"Debug: Results: {results}")
-
-        # #将检测框绘制到图片上
-        # output_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data/color_000000_with_boxes.png'
-        # img = cv2.imread(rgb_path)  
-        # for idx, obj in enumerate(results["objects"]):
-        #     # 获取 bbox，并转换成整数像素
-        #     x1, y1, x2, y2 = map(int, obj["bbox"])
-        #     label = obj["category"]
-        #     score = obj["score"]
-        #     # 第一个框红色，其余绿色
-        #     box_color = (0, 0, 255) if idx == 0 else (0, 255, 0)
-        #     # 画矩形框
-        #     cv2.rectangle(img, (x1, y1), (x2, y2), box_color, 2)
-        #     # 在框上方写 “类别:置信度”，字体大小 0.5，线宽 1
-        #     text = f"{label}: {score:.2f}"
-        #     cv2.putText(
-        #         img, text,
-        #         (x1, y1 - 5),
-        #         cv2.FONT_HERSHEY_SIMPLEX,
-        #         0.5,               # 字体大小
-        #         box_color,       # 字体颜色
-        #         1,                 # 线宽
-        #         cv2.LINE_AA
-        #     )
-        # cv2.imwrite(output_path, img)
-        # print(f"已将带框结果保存到：{output_path}")
-
-        # # 提取检测框中心点
-        # # 假设 results 已经拿到
-        # if results["objects"]:
-        #     x1, y1, x2, y2 = results["objects"][0]["bbox"]
-        #     cx = (x1 + x2) / 2
-        #     cy = (y1 + y2) / 2
-        #     print(f"第一个目标的中心点：({cx:.2f}, {cy:.2f})")
-        # else:
-        #     print("没有检测到任何目标")
 
 
-        #暂停
-        input('Press Enter to continue...')
-
-
-        target_position_x_1_desk = box_x
-        target_position_y_1_desk = box_y
-        # 玩具的位置，桌子坐标系
-        object_position_x_1_desk = toy_x
-        object_position_y_1_desk = toy_y 
-
-
-        # warm up the robot
-        self.__warm_up()
-
-        # get current pose
-        starting_pose = self.__get_tcp_pose()
-        print('starting_pose:', starting_pose)
-
-        #3个高度
-        z_middle_1 = 0.26
-        z_bottom_1 = 0.20
-        z_top_1 = 0.35
-        z_toptop = 0.4
-
+        ####################### 坐标系转换 ##########################
+        # 取第一个关键点的 XYZ
+        first_xyz = keypoints[0]
+        # 拼接单位四元数 [0,0,0,1]，构成 7D pose
+        identity_quat = np.array([0.0, 0.0, 0.0, 1.0])
+        pose7d_world = np.hstack((first_xyz, identity_quat)) 
+        # 调用对7d位姿的转换方法实现转换
+        pose7d_robot = self.pose7d_world2robot_from_rekep(pose7d_world)
+        # 机器人坐标系下的xyz
+        robot_xyz = pose7d_robot[:3]
+        print(f"World XYZ: {first_xyz}")
+        print(f"Robot XYZ: {robot_xyz}")
+        #提取转换后xyz的x,y
+        toy_x_in_robot = robot_xyz[0]
+        toy_y_in_robot = robot_xyz[1]
         #机器人坐标系和桌子坐标系之间的偏移
         delta_x = 0.1595
         delta_y = 0.1235
+        # 转换到桌子坐标系
+        toy_x_in_desk = toy_x_in_robot - delta_x
+        toy_y_in_desk = toy_y_in_robot - delta_y
 
-        # 目标放置位置，机器人坐标系
-        target_position_x_1 = target_position_x_1_desk + delta_x
-        target_position_y_1 = target_position_y_1_desk + delta_y
-
-        # 目标抓取位置 ，机器人坐标系
-        object_position_x_1 = object_position_x_1_desk + delta_x
-        object_position_y_1 = object_position_y_1_desk + delta_y
-
-        # 目标位姿序列
-        # destination poses
-        fixed_rotation = starting_pose[3:]
-        dest_pose_1_1 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
-        dest_pose_1_2 = [object_position_x_1, object_position_y_1, z_bottom_1] + fixed_rotation
-        dest_pose_1_3 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
-        dest_pose_1_4 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
-        dest_pose_1_5 = [target_position_x_1, target_position_y_1, z_middle_1] + fixed_rotation
-        dest_pose_1_6 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
-
-        # 控制移动
-        # move to the destination poses
-        self.__move_to_pose(dest_pose_1_1, 6)
-        self.__move_to_pose(dest_pose_1_2, 2)
-        self.__grasp()
-        self.__move_to_pose(dest_pose_1_3, 6)
-        self.__move_to_pose(dest_pose_1_4, 2)
-        self.__move_to_pose(dest_pose_1_5, 2)
-        self.__open()
-        self.__move_to_pose(dest_pose_1_6, 2)
-
-        # 回到初始位置
-        # move back to the starting pose
-        self.__move_to_pose(starting_pose, 3)
+        ####################### 运动 ##########################
+        self.script_grasp_one_toy_on_box(toy_x_in_desk,toy_y_in_desk,box_x,box_y)
 
 
 

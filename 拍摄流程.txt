@@ -1,0 +1,14 @@
+
+
+movie_script.py中只调用：photo_shot()
+/home/ur5/anaconda3/envs/rekep4real/bin/python /home/ur5/ur5Control/UR5e_Control/RobotEnvironment/movie_script.py
+
+
+
+
+
+
+
+
+
+
