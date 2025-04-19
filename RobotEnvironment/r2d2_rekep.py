@@ -30,7 +30,7 @@ from rekep.utils import (
     print_opt_debug_dict,
 )
 
-from r2d2_vision import R2D2Vision
+# from r2d2_vision import R2D2Vision
 
 import datetime
 
