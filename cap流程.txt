@@ -1,0 +1,10 @@
+
+脚本：
+/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/myCap.py
+
+输入有3个
+指令
+图片：query_image.png
+prompt：cap_prompt_template.txt
+
+运行前先warmup
