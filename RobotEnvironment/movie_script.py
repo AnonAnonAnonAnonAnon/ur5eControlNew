@@ -12,7 +12,7 @@ robot_environment = RobotEnvironment(pc_id=2)
 
 # warmup
 # 可视化界面，键盘控制移动
-robot_environment.run_loop()
+# robot_environment.run_loop()
 
 # 电影1：抓一个玩具放到盒子上
 # 参数：玩具x,y，盒子x,y
@@ -20,7 +20,7 @@ robot_environment.run_loop()
 
 # 电影2：抓一个玩具，旋转90度，放到盒子上
 # 参数：玩具x,y，盒子x,y ; 旋转模式 1:x- 2:y- 3:x-y- 4:x-60y-30
-# robot_environment.Script_BottleBox_GraspRotatePlace(-0.66,-0.21,-0.67,-0.62,4)
+robot_environment.Script_BottleBox_GraspRotatePlace(-0.66,-0.21,-0.67,-0.62,4)
 
 # 电影3：抓取指定物体到盒子上，视觉检测
 # 参数：物体名称，盒子x,y

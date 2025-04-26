@@ -25,7 +25,9 @@ class Gripper(MotorController):
         super().__init__(pc_id)
         self._add_realtime_properties(['gripper_state'], [0.0])
 
-        self.ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=1)
+        # 这里是会变化的
+        # ser = serial.Serial('/dev/ttyCH341USB0',9600,timeout=1)
+        self.ser = serial.Serial(port='/dev/ttyCH341USB0', baudrate=9600, timeout=1)
 
         # constants
         self.MAX_SPEED_42 = (0X01,0X40) # max speed 42rad/s

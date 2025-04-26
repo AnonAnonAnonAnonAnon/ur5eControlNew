@@ -19,8 +19,11 @@ from hydra import compose, initialize
 from hydra.utils import instantiate
 
 #sam的权重文件和配置文件的路径
-checkpoint = "//home//ur5//rekep//ReKepUR5_from_kinova//sam2model//sam2.1_hiera_base_plus.pt"
-model_cfg = "//home//ur5//rekep//ReKepUR5_from_kinova//sam2model//sam2.1_hiera_b+.yaml"
+# pc0:/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/sam2model
+checkpoint = "//home//liwenbo//project//yt//ur5eControlNew//RobotEnvironment//sam2model//sam2.1_hiera_base_plus.pt"
+model_cfg = "//home//liwenbo//project//yt//ur5eControlNew//RobotEnvironment//sam2model//sam2.1_hiera_b+.yaml"
+# checkpoint = "//home//ur5//rekep//ReKepUR5_from_kinova//sam2model//sam2.1_hiera_base_plus.pt"
+# model_cfg = "//home//ur5//rekep//ReKepUR5_from_kinova//sam2model//sam2.1_hiera_b+.yaml"
 # checkpoint =  "//home//kinova//Model//sam2.1_hiera_base_plus.pt"
 # model_cfg = "//home//kinova//Model//sam2.1_hiera_base_plus.yaml"
 
@@ -60,8 +63,11 @@ def timer_decorator(func):
 class MainVision:
     def __init__(self, visualize=False):
         # 获取配置文件
-        global_config = get_config(config_path="/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/configs/config.yaml")
-        # 这里直接获取绝对路径
+        # global_config = get_config(config_path="/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/configs/config.yaml")
+        global_config = get_config(config_path="/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/configs/config.yaml")
+        #/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/configs/config.yaml
+        # 这里直接获取绝对路径，所以不同电脑上路径不同
+        # 相对路径：未尝试
         
         self.config = global_config['main']
         self.visualize = visualize
@@ -225,6 +231,10 @@ class MainVision:
         #png格式的rgb图
         png_path = os.path.join(data_path, f'color_{frame_number:06d}.png')
 
+        # 打印color_path和depth_path
+        print(f"Debug: color_path: {color_path}")
+        print(f"Debug: depth_path: {depth_path}")
+
         if not os.path.exists(color_path) or not os.path.exists(depth_path):
             raise FileNotFoundError(f"Color or depth frame not found for frame {frame_number}")
 
@@ -323,8 +333,10 @@ class MainVision:
 
         # 保存图片
         # 这里报错说相对路径读不到，所以绝对路径
-        plt.savefig('/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data/gdino_objects.png', bbox_inches='tight', dpi=300)
-        
+        # plt.savefig('/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data/gdino_objects.png', bbox_inches='tight', dpi=300)
+        plt.savefig('/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/data/gdino_objects.png', bbox_inches='tight', dpi=300)
+
+
         plt.close()
         
     def _show_image(self, idx_img, rgb, masks = None,bboxes = None):

@@ -2,5 +2,6 @@
 准备：
     标定（见【标定流程】）
     warmup（见【键盘控制流程】）
+        如果夹爪权限出现问题，【sudo chmod 666 /dev/ttyCH341USB0】
     脚本：detectGrasp_script.py （注释掉run_loop()）
     参数：物体名称，盒子位置（标定点2位置：-0.6 -0.2）

@@ -530,8 +530,10 @@ class RobotEnvironment(Visualizer, MotorController):
 
             # transformation matrix
 
+            # 绝对路径
             # 从配置文件中获取坐标系变换矩阵
-            with open('/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/auto_callibration.json', 'r') as f:
+            # with open('/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/auto_callibration.json', 'r') as f:
+            with open('/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/auto_callibration.json', 'r') as f:
                 robot_state = json.load(f)
                 # 获取坐标系变换矩阵
                 mat_world2robot = np.array(robot_state['misc']['world2robot_homo']) # 从世界坐标系(cam)变换到机器人坐标系(base)
@@ -611,7 +613,6 @@ class RobotEnvironment(Visualizer, MotorController):
         # 回到初始位置
         # move back to the starting pose
         self.__move_to_pose(starting_pose, 3)
-
 
     def script_grasp_six_toy(self):
         # warm up the robot
@@ -791,7 +792,6 @@ class RobotEnvironment(Visualizer, MotorController):
         # move back to the starting pose
         self.__move_to_pose(starting_pose, 3)
 
-
     def Script_BottleBox_GraspRotatePlace(self,toy_x,toy_y,box_x,box_y,rotate_mode):
         
         ####################### 传入参数 ##########################
@@ -915,12 +915,13 @@ class RobotEnvironment(Visualizer, MotorController):
         # move back to the starting pose
         self.__move_to_pose(starting_pose, 5)
 
-
     def Script_Grasp_ToyBox_Vision(self,obj,box_x,box_y):
         #添加main_vision.py中的gdino提取物体位置功能，提取玩具，在转换机器人坐标系
 
         ####################### 关键点提取 ##########################
-        data_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data'
+        # data_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data'
+        data_path = '/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/data'
+
         frame_number = 0
         keypoints = get_keypoints_from_rekep(obj,data_path,frame_number)
         print(f"Debug: Keypoints: {keypoints}")
@@ -950,6 +951,136 @@ class RobotEnvironment(Visualizer, MotorController):
 
         ####################### 运动 ##########################
         self.script_grasp_one_toy_on_box(toy_x_in_desk,toy_y_in_desk,box_x,box_y)
+
+    #获取指定物体在桌面坐标系下的位置
+    def get_obj_position_in_desk(self,obj):
+
+        ####################### 关键点提取 ##########################
+        # data_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data'
+        data_path = '/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/data'
+
+        frame_number = 0
+        keypoints = get_keypoints_from_rekep(obj,data_path,frame_number)
+        print(f"Debug: Keypoints: {keypoints}")
+
+        ####################### 坐标系转换 ##########################
+        # 取第一个关键点的 XYZ
+        first_xyz = keypoints[0]
+        # 拼接单位四元数 [0,0,0,1]，构成 7D pose
+        identity_quat = np.array([0.0, 0.0, 0.0, 1.0])
+        pose7d_world = np.hstack((first_xyz, identity_quat)) 
+        # 调用对7d位姿的转换方法实现转换
+        pose7d_robot = self.pose7d_world2robot_from_rekep(pose7d_world)
+        # 机器人坐标系下的xyz
+        robot_xyz = pose7d_robot[:3]
+        print(f"World XYZ: {first_xyz}")
+        print(f"Robot XYZ: {robot_xyz}")
+        #提取转换后xyz的x,y
+        obj_x_in_robot = robot_xyz[0]
+        obj_y_in_robot = robot_xyz[1]
+        #机器人坐标系和桌子坐标系之间的偏移
+        delta_x = 0.1595
+        delta_y = 0.1235
+        # 转换到桌子坐标系
+        obj_x_in_desk = obj_x_in_robot - delta_x
+        obj_y_in_desk = obj_y_in_robot - delta_y
+
+        return obj_x_in_desk,obj_y_in_desk
+
+    #获取指定物体在机器人坐标系下的位置
+    def get_obj_position_in_robot(self,obj):
+
+        ####################### 关键点提取 ##########################
+        # data_path = '/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data'
+        data_path = '/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/data'
+
+        frame_number = 0
+        keypoints = get_keypoints_from_rekep(obj,data_path,frame_number)
+        print(f"Debug: Keypoints: {keypoints}")
+
+        ####################### 坐标系转换 ##########################
+        # 取第一个关键点的 XYZ
+        first_xyz = keypoints[0]
+        # 拼接单位四元数 [0,0,0,1]，构成 7D pose
+        identity_quat = np.array([0.0, 0.0, 0.0, 1.0])
+        pose7d_world = np.hstack((first_xyz, identity_quat)) 
+        # 调用对7d位姿的转换方法实现转换
+        pose7d_robot = self.pose7d_world2robot_from_rekep(pose7d_world)
+        # 机器人坐标系下的xyz
+        robot_xyz = pose7d_robot[:3]
+        print(f"World XYZ: {first_xyz}")
+        print(f"Robot XYZ: {robot_xyz}")
+        #提取转换后xyz的x,y
+        obj_x_in_robot = robot_xyz[0]
+        obj_y_in_robot = robot_xyz[1]
+
+        return obj_x_in_robot,obj_y_in_robot
+
+    #移动到机器人坐标系下指定位置
+    #指定高度等级
+    def move_to_position_in_robot(self,x,y,z):
+  
+        # warm up the robot
+        self.__warm_up()
+
+        # get current pose
+        starting_pose = self.__get_tcp_pose()
+        print('starting_pose:', starting_pose)
+        fixed_rotation = starting_pose[3:]
+
+        z_bottom_1 = 0.20
+        z_middle_1 = 0.26
+        z_top_1 = 0.35
+
+        if z == 0:
+            z= z_bottom_1
+        elif z == 1:
+            z= z_middle_1
+        elif z == 2:
+            z= z_top_1
+
+        # 控制移动
+        # move to the destination poses
+        self.__move_to_pose([x,y,z]+fixed_rotation, 5)
+    
+    #移动到桌面坐标系下指定位置
+    #指定高度等级:0为贴近桌面，1为距离桌面一个物体的高度，2为机械臂能够安全移动不碰到物体的高度
+    def move_to_position_in_desk(self,x,y,z):
+  
+        # warm up the robot
+        self.__warm_up()
+
+        # get current pose
+        starting_pose = self.__get_tcp_pose()
+        print('starting_pose:', starting_pose)
+        fixed_rotation = starting_pose[3:]
+
+        #机器人坐标系和桌子坐标系之间的偏移
+        delta_x = 0.1595
+        delta_y = 0.1235
+
+        z_bottom_1 = 0.20
+        z_middle_1 = 0.26
+        z_top_1 = 0.35
+
+        if z == 0:
+            z= z_bottom_1
+        elif z == 1:
+            z= z_middle_1
+        elif z == 2:
+            z= z_top_1
+
+        # 控制移动
+        # move to the destination poses
+        self.__move_to_pose([x+delta_x,y+delta_y,z]+fixed_rotation, 5)
+
+    #抓取指定物体
+    def gripper_grasp(self):
+        self.__grasp()
+
+    #打开夹爪
+    def gripper_open(self):
+        self.__open()
 
 
 

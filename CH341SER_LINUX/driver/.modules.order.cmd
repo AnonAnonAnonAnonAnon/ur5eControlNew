@@ -1,1 +1,1 @@
-savedcmd_/home/cyt/ur5eControl/CH341SER_LINUX/driver/modules.order := {   echo /home/cyt/ur5eControl/CH341SER_LINUX/driver/ch341.o; :; } > /home/cyt/ur5eControl/CH341SER_LINUX/driver/modules.order
+savedcmd_/home/liwenbo/project/yt/ur5eControlNew/CH341SER_LINUX/driver/modules.order := {   echo /home/liwenbo/project/yt/ur5eControlNew/CH341SER_LINUX/driver/ch341.o; :; } > /home/liwenbo/project/yt/ur5eControlNew/CH341SER_LINUX/driver/modules.order

@@ -65,7 +65,8 @@ class PRS:
 #固定data_path为/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data
 #固定frame_number为0
 def photo_shot():
-    data_path = "/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data"
+    data_path = "/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/data"
+    # data_path = "/home/ur5/ur5Control/UR5e_Control/RobotEnvironment/data"
     frame_number = 0
     prs = PRS()
     time.sleep(2)

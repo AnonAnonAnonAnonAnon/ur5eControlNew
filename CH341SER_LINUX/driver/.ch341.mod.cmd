@@ -1,1 +1,1 @@
-savedcmd_/home/cyt/ur5eControl/CH341SER_LINUX/driver/ch341.mod := printf '%s\n'   ch341.o | awk '!x[$$0]++ { print("/home/cyt/ur5eControl/CH341SER_LINUX/driver/"$$0) }' > /home/cyt/ur5eControl/CH341SER_LINUX/driver/ch341.mod
+savedcmd_/home/liwenbo/project/yt/ur5eControlNew/CH341SER_LINUX/driver/ch341.mod := printf '%s\n'   ch341.o | awk '!x[$$0]++ { print("/home/liwenbo/project/yt/ur5eControlNew/CH341SER_LINUX/driver/"$$0) }' > /home/liwenbo/project/yt/ur5eControlNew/CH341SER_LINUX/driver/ch341.mod

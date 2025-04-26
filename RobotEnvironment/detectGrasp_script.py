@@ -12,11 +12,12 @@ robot_environment = RobotEnvironment(pc_id=2)
 
 # warmup
 # 可视化界面，键盘控制移动
-# robot_environment.run_loop()
+robot_environment.run_loop()
 
 
 # 抓取指定物体到盒子上，视觉检测
 # 参数：物体名称，盒子x,y
-robot_environment.Script_Grasp_ToyBox_Vision('toy',-0.6,-0.2)
+# robot_environment.Script_Grasp_ToyBox_Vision('toy',-0.6,-0.2)
 
+# robot_environment.Script_Grasp_ToyBox_Vision('pen',-0.6,-0.2)
 

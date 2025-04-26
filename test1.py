@@ -24,8 +24,8 @@ def main():
     # 夹爪
     # 取决于具体串口 
     # ls /dev
-    ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-    # ser = serial.Serial('/dev/ttyCH341USB0',9600,timeout=1)
+    # ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+    ser = serial.Serial('/dev/ttyCH341USB0',9600,timeout=1)
     # ser = serial.Serial('/dev/ttyCH341USB1',9600,timeout=1)
 
     time.sleep(2)
@@ -65,3 +65,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
