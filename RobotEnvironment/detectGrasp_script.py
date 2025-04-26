@@ -5,7 +5,7 @@ from robot_environment import RobotEnvironment
 from photo import photo_shot
 
 #拍照，如果需要
-photo_shot()
+# photo_shot()
 
 #初始化机器人对象
 robot_environment = RobotEnvironment(pc_id=2)
