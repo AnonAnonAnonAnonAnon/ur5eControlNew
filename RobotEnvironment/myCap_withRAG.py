@@ -8,6 +8,7 @@ import argparse
 import base64
 import runpy
 from openai import OpenAI
+import shutil
 
 # --------------------------------------------
 # VLM 调用封装
@@ -88,22 +89,68 @@ def extract_code_block(vlm_output) -> str:
 def main():
     p = argparse.ArgumentParser(description="查询 VLM，提取代码并执行")
     p.add_argument("--instruction", required=False,
-                   default="抓取玩具放到笔上",
+                   default="place bottle on pen",
                    help="文本形式的指令")
     p.add_argument("--prompt",      required=False,
-                   default="cap_prompt_template.txt",
+                   default="/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/cap_prompt_template.txt",
                    help="prompt 模板文件路径")
     p.add_argument("--image",       required=False,
-                   default="query_image.png",
+                   default="/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/query_image.png",
                    help="图片文件路径")
     args = p.parse_args()
 
     # 确保当前目录能 import 本地模块
     sys.path.insert(0, os.getcwd())
 
-    # 硬编码 API Key，不从环境变量导入
-    api_key = "sk-7h6cOfz7m4hIRwIp3MAliy4WKTfB1oHtRa0kv29fsJu3bOd7"
+    # 准备历史记录目录
+    history_dir = "/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/exec_history"
+    os.makedirs(history_dir, exist_ok=True)
 
+    # 关键词分词
+    keywords = re.findall(r"\w+", args.instruction.lower())
+    print(f"[DEBUG] keywords: {keywords}")
+
+    # 计算每个历史脚本的匹配得分
+    scores = {}
+    for fname in os.listdir(history_dir):
+        if not fname.endswith(".py"):
+            continue
+        name = os.path.splitext(fname)[0].lower()
+        score = sum(name.count(kw) for kw in keywords)
+        if score > 0:
+            scores[fname] = score
+    # 取前 N 个最匹配脚本
+    N = 3
+    selected = sorted(scores, key=lambda f: scores[f], reverse=True)[:N]
+    print(f"[DEBUG] scores: {scores}")
+    print(f"[DEBUG] selected: {selected}")
+    # 读取选中脚本内容
+    history_texts = []
+    for fname in selected:
+        path = os.path.join(history_dir, fname)
+        with open(path, "r", encoding="utf-8") as f:
+            history_texts.append(f.read())
+    history_txt = "\n\n".join(history_texts)
+    print(f"[DEBUG] history_txt: {history_txt}")
+
+    # 读取原始 prompt 模板
+    with open(args.prompt, "r", encoding="utf-8") as f:
+        prompt_template = f.read()
+
+    # 合并历史与原模板，生成新的 prompt 文件
+    merged_prompt = (
+        "### Context from history scripts:\n" +
+        history_txt +
+        "\n\n### Original prompt template:\n" +
+        prompt_template
+    )
+    print(f"[DEBUG] merged_prompt: {merged_prompt}")
+    merged_prompt_file = "merged_prompt.txt"
+    with open(merged_prompt_file, "w", encoding="utf-8") as f:
+        f.write(merged_prompt)
+
+    # 硬编码 API Key
+    api_key = "sk-7h6cOfz7m4hIRwIp3MAliy4WKTfB1oHtRa0kv29fsJu3bOd7"
     vlm = VLMClient(
         api_key=api_key,
         base_url="https://api.chatanywhere.tech",
@@ -113,11 +160,11 @@ def main():
     )
 
     print("[INFO] 开始向 VLM 提交任务…")
-    raw_output = vlm.query(args.instruction, args.prompt, args.image)
+    print(f"[DEBUG] merged_prompt_file: {merged_prompt_file}")
+    raw_output = vlm.query(args.instruction, merged_prompt_file, args.image)
     print("[INFO] VLM 原始返回：")
     print(raw_output)
 
-    # 如果 raw_output 不是字符串或为空，extract_code_block 会返回空字符串
     code = extract_code_block(raw_output)
     if not code.strip():
         print("[WARN] 未从 VLM 返回中提取到任何代码，退出。")
@@ -132,14 +179,16 @@ def main():
         f.write(code)
     print(f"[INFO] 代码已保存至 {out_file}")
 
-    #############################执行################################
-    # 执行它
-    print(f"[INFO] 正在执行 {out_file} …")
+    # 备份到历史目录
+    task_name = re.sub(r"\W+", "_", args.instruction.strip().lower()).strip("_")
+    history_file = os.path.join(history_dir, f"{task_name}.py")
+    shutil.copy(out_file, history_file)
+    print(f"[INFO] 已将脚本备份至 {history_file}")
 
-    # 调试，暂时不执行
+    ############################# 执行 ################################
+    print(f"[INFO] 正在执行 {out_file} …")
     # runpy.run_path(out_file, run_name="__main__")
-    
-    print("[INFO] 执行完毕。")
+    print("[INFO] 执行流程完成(此处未实际执行脚本)。")
 
 if __name__ == "__main__":
     main()

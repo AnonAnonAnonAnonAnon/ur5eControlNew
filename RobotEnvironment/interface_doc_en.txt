@@ -1,0 +1,161 @@
+# Robot Control API Interface
+
+1. **photo_shot()**  
+   **Description:**  
+   Captures an image using the robot’s camera and makes it available for processing.  
+   **Parameters:**  
+   None  
+   **Returns:**  
+   None
+
+2. **RobotEnvironment()**  
+   **Description:**  
+   Creates and initializes the robot environment, including connections to the robot controller, camera manager, and visualization window.  
+   **Parameters:**  
+   None  
+   **Returns:**  
+   An instance of `RobotEnvironment`
+
+3. **move_to_pose(pose, trajectory_time=1)**  
+   **Description:**  
+   Plans and executes a smooth Cartesian trajectory from the current TCP pose to the target 6D `pose`.  
+   **Parameters:**  
+   - `pose` (list of 6 floats): Target `[x, y, z, rx, ry, rz]`.  
+   - `trajectory_time` (float): Duration in seconds for the motion.  
+   **Returns:**  
+   None
+
+4. **get_obj_pose(obj)**  
+   **Description:**  
+   Detects the specified object and returns its full pose in the robot frame.  
+   **Parameters:**  
+   - `obj` (str): Label/name of the target object.  
+   **Returns:**  
+   A list of seven floats `[x, y, z, qx, qy, qz, qw]`
+
+5. **get_obj_position_in_camera(obj)**  
+   **Description:**  
+   Uses the vision pipeline to detect the specified object and returns its 2D image coordinates in the camera’s frame.  
+   **Parameters:**  
+   - `obj` (str): Label/name of the target object.  
+   **Returns:**  
+   A tuple `(x, y)` in the camera frame
+
+6. **get_obj_position_in_robot(obj)**  
+   **Description:**  
+   Detects object `obj` via vision, transforms its 3D position into the robot base frame, and returns the planar coordinates.  
+   **Parameters:**  
+   - `obj` (str): Object label.  
+   **Returns:**  
+   A tuple `(x, y)` in the robot frame
+
+7. **move_to_position_in_robot(x, y, height_level)**  
+   **Description:**  
+   High-level convenience method that warms up the robot, computes a Z height from `height_level`, and moves to `(x, y, z)` in the robot frame.  
+   **Parameters:**  
+   - `x`, `y` (float): Target coordinates in the robot frame.  
+   - `height_level` (int):  
+     - `0` — Lowest height (≈0.20 m).  
+     - `1` — Medium height (≈0.26 m).  
+     - `2` — Top height (≈0.35 m).  
+   **Returns:**  
+   None
+
+8. **gripper_grasp()**  
+   **Description:**  
+   Convenience alias to close the gripper and grasp an object.  
+   **Parameters:**  
+   None  
+   **Returns:**  
+   None
+
+9. **gripper_open()**  
+   **Description:**  
+   Convenience alias to open the gripper and release an object.  
+   **Parameters:**  
+   None  
+   **Returns:**  
+   None
+
+10. **get_tcp_pose()**  
+    **Description:**  
+    Retrieves the current tool-center-point (TCP) pose of the robot in its own coordinate frame.  
+    **Parameters:**  
+    None  
+    **Returns:**  
+    A list of six floats `[x, y, z, rx, ry, rz]`
+
+11. **get_joint_positions()**  
+    **Description:**  
+    Reads the current joint angles of the robot.  
+    **Parameters:**  
+    None  
+    **Returns:**  
+    A list of six floats `[j1, j2, j3, j4, j5, j6]` (in radians)
+
+12. **get_tip_direction()**  
+    **Description:**  
+    Computes the orientation vector of the tool tip in Cartesian space based on current joint angles and kinematic parameters.  
+    **Parameters:**  
+    None  
+    **Returns:**  
+    A list of three floats `[dx, dy, dz]`
+
+13. **pose7d_world2robot(pose7d)**  
+    **Description:**  
+    Converts a 7-degree pose `[x, y, z, qx, qy, qz, qw]` from the world/camera frame into the robot base frame using a calibration matrix.  
+    **Parameters:**  
+    - `pose7d` (list of 7 floats): World pose with quaternion orientation.  
+    **Returns:**  
+    A list of 7 floats representing the pose in the robot frame
+
+14. **detect_and_grasp(obj, height_level)**  
+    **Description:**  
+    Captures the scene, finds the planar position of `obj` in the robot frame, moves the end-effector there at `height_level`, and closes the gripper.  
+    **Parameters:**  
+    - `obj` (str): Label of the target object  
+    - `height_level` (int): See `move_to_position_in_robot`  
+    **Returns:**  
+    None  
+    **Composition:**  
+    1. `photo_shot()`  
+    2. `(x, y) = get_obj_position_in_robot(obj)`  
+    3. `move_to_position_in_robot(x, y, height_level)`  
+    4. `gripper_grasp()`
+
+15. **pick_and_place(pick_obj, place_obj, pick_height, place_height)**  
+    **Description:**  
+    Full pick-and-place routine:  
+    1. Detects and grasps `pick_obj` at `pick_height`.  
+    2. Raises to safe transit height.  
+    3. Detects `place_obj` and moves there at transit height.  
+    4. Lowers to `place_height` and releases.  
+    **Parameters:**  
+    - `pick_obj` (str): Label to pick.  
+    - `place_obj` (str): Label to place.  
+    - `pick_height` (int): Height level for picking (0–2).  
+    - `place_height` (int): Height level for placing (0–2).  
+    **Returns:**  
+    None
+
+16. **collect_objects_to_container(obj_list, container_label, pick_height, place_height)**  
+    **Description:**  
+    Detects the container, then sequentially picks each object in `obj_list` and places it into that container.  
+    **Parameters:**  
+    - `obj_list` (List[str]): Labels of objects to collect.  
+    - `container_label` (str): Label of the container.  
+    - `pick_height` (int): Height level for picking (0–2).  
+    - `place_height` (int): Height level for placing (0–2).  
+    **Returns:**  
+    None  
+    **Composition:**  
+    1. `photo_shot()`  
+    2. `(x_cont, y_cont) = get_obj_position_in_robot(container_label)`  
+    3. For each `obj` in `obj_list`:  
+       a. `photo_shot()`  
+       b. `(x, y) = get_obj_position_in_robot(obj)`  
+       c. `move_to_position_in_robot(x, y, pick_height)`  
+       d. `gripper_grasp()`  
+       e. `move_to_position_in_robot(x_cont, y_cont, 2)`  
+       f. `move_to_position_in_robot(x_cont, y_cont, place_height)`  
+       g. `gripper_open()`

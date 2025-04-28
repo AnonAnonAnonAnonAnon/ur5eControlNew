@@ -1,0 +1,40 @@
+接口文档：
+
+1. photo_shot()
+   功能：触发相机进行拍照，并将图像保存到预设路径或由上层程序获取。
+   参数：无
+   返回：None
+
+2. RobotEnvironment(pc_id)
+   功能：创建并初始化机器人环境对象，包括连接机器人控制器和相机等必要组件。
+   参数：
+     pc_id (int)：用于指定机器人或相机的编号。
+   返回：RobotEnvironment 实例
+
+3. get_obj_position_in_robot(object_name)
+   功能：在机器人坐标系中检测并获取指定物体的位置。
+   参数：
+     object_name (str)：目标物体的名称，应与识别模型中的标签一致。
+   返回：
+     tuple(float, float)：物体在平面上的 (x, y) 坐标，单位通常为米。
+
+4. move_to_position_in_robot(x, y, height_level)
+   功能：控制机器人末端执行器移动到给定的 (x, y) 平面位置和指定高度等级。
+   参数：
+     x (float)：目标位置的 x 坐标（机器人坐标系）。
+     y (float)：目标位置的 y 坐标（机器人坐标系）。
+     height_level (int)：高度等级，取值：
+       0 – 贴近桌面，用于平移到物体接触位置之前。
+       1 – 距离桌面一个物体的高度，用于抓取或放置动作的执行高度。
+       2 – 足够高度，确保机械臂在移动过程中避开其他物体。
+   返回：None
+
+5. gripper_grasp()
+   功能：控制机械臂末端夹爪闭合以抓取物体。
+   参数：无
+   返回：None
+
+6. gripper_open()
+   功能：控制机械臂末端夹爪张开以释放物体。
+   参数：无
+   返回：None
