@@ -89,7 +89,7 @@ def extract_code_block(vlm_output) -> str:
 def main():
     p = argparse.ArgumentParser(description="查询 VLM，提取代码并执行")
     p.add_argument("--instruction", required=False,
-                   default="place bottle on pen",
+                   default="place toy into box",
                    help="文本形式的指令")
     p.add_argument("--prompt",      required=False,
                    default="/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/cap_prompt_template.txt",
@@ -188,7 +188,7 @@ def main():
     ############################# 执行 ################################
     print(f"[INFO] 正在执行 {out_file} …")
     # runpy.run_path(out_file, run_name="__main__")
-    print("[INFO] 执行流程完成(此处未实际执行脚本)。")
+    print("[INFO] 执行流程完成")
 
 if __name__ == "__main__":
     main()

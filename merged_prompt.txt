@@ -32,6 +32,40 @@ robot_environment.move_to_position_in_robot(pen_x, pen_y, 2)
 time.sleep(2)
 
 
+from robot_environment import RobotEnvironment
+from photo import photo_shot
+import time
+
+photo_shot()
+robot_environment = RobotEnvironment(pc_id=2)
+
+bottle_x, bottle_y = robot_environment.get_obj_position_in_robot('bottle')
+print(f"瓶子位置: {bottle_x}, {bottle_y}")
+pen_x, pen_y = robot_environment.get_obj_position_in_robot('pen')
+print(f"笔位置: {pen_x}, {pen_y}")
+time.sleep(2)
+robot_environment.move_to_position_in_robot(bottle_x, bottle_y, 2)
+time.sleep(2)
+robot_environment.move_to_position_in_robot(bottle_x, bottle_y, 1)
+time.sleep(2)
+robot_environment.move_to_position_in_robot(bottle_x, bottle_y, 0)
+time.sleep(2)
+robot_environment.gripper_grasp()
+time.sleep(2)
+robot_environment.move_to_position_in_robot(bottle_x, bottle_y, 2)
+time.sleep(2)
+robot_environment.move_to_position_in_robot(pen_x, pen_y, 2)
+time.sleep(2)
+robot_environment.move_to_position_in_robot(pen_x, pen_y, 1)
+time.sleep(2)
+robot_environment.move_to_position_in_robot(pen_x, pen_y, 0)
+time.sleep(2)
+robot_environment.gripper_open()
+time.sleep(2)
+robot_environment.move_to_position_in_robot(pen_x, pen_y, 2)
+time.sleep(2)
+
+
 ### Original prompt template:
 你是一个高级 Python 机器人控制脚本生成助手。
 

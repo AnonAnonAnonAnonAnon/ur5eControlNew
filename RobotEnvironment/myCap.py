@@ -88,13 +88,13 @@ def extract_code_block(vlm_output) -> str:
 def main():
     p = argparse.ArgumentParser(description="查询 VLM，提取代码并执行")
     p.add_argument("--instruction", required=False,
-                   default="抓取玩具放到笔上",
+                   default="place toy into box",
                    help="文本形式的指令")
     p.add_argument("--prompt",      required=False,
-                   default="cap_prompt_template.txt",
+                   default="/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/cap_prompt_template.txt",
                    help="prompt 模板文件路径")
     p.add_argument("--image",       required=False,
-                   default="query_image.png",
+                   default="/home/liwenbo/project/yt/ur5eControlNew/RobotEnvironment/data/color_000000.png",
                    help="图片文件路径")
     args = p.parse_args()
 

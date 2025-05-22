@@ -902,11 +902,11 @@ class RobotEnvironment(Visualizer, MotorController):
 
         ####################### 控制移动 ##########################
         # move to the destination poses
-        self.__move_to_pose(dest_pose_1_1, 5)
+        self.__move_to_pose(dest_pose_1_1, 10)
         self.__move_to_pose(dest_pose_1_2, 5)
         self.__grasp()
         self.__move_to_pose(dest_pose_1_3, 5)
-        self.__move_to_pose(dest_pose_1_4, 5)
+        self.__move_to_pose(dest_pose_1_4, 15)
         self.__move_to_pose(dest_pose_1_5, 5)
         self.__open()
         self.__move_to_pose(dest_pose_1_6, 5)
@@ -1081,6 +1081,261 @@ class RobotEnvironment(Visualizer, MotorController):
     #打开夹爪
     def gripper_open(self):
         self.__open()
+    
+    def script_Toy_in_Box(self,toy_x,toy_y,box_x,box_y):
+        
+        #################################################填写
+        # 注意，是负值，单位是米
+        # 盒子的位置，桌子坐标系
+        # 标定点位置： -0.56 -0.51 0.66 -0.21
+        target_position_x_1_desk = box_x
+        target_position_y_1_desk = box_y
+        # 玩具的位置，桌子坐标系
+        object_position_x_1_desk = toy_x
+        object_position_y_1_desk = toy_y 
+        #################################################填写
+
+        # warm up the robot
+        self.__warm_up()
+
+        # get current pose
+        starting_pose = self.__get_tcp_pose()
+        print('starting_pose:', starting_pose)
+
+        #3个高度
+        z_middle_1 = 0.26
+        z_bottom_1 = 0.19
+        z_top_1 = 0.35
+        z_toptop = 0.4
+
+        #机器人坐标系和桌子坐标系之间的偏移
+        delta_x = 0.1595
+        delta_y = 0.1235
+
+        # 目标放置位置，机器人坐标系
+        target_position_x_1 = target_position_x_1_desk + delta_x
+        target_position_y_1 = target_position_y_1_desk + delta_y
+
+        # 目标抓取位置 ，机器人坐标系
+        object_position_x_1 = object_position_x_1_desk + delta_x
+        object_position_y_1 = object_position_y_1_desk + delta_y
+
+        # 目标位姿序列
+        # destination poses
+        fixed_rotation = starting_pose[3:]
+        dest_pose_1_1 = [object_position_x_1, object_position_y_1, z_bottom_1] + fixed_rotation
+        dest_pose_1_2 = [(object_position_x_1+target_position_x_1)/2, (object_position_y_1+target_position_y_1)/2, z_top_1] + fixed_rotation
+        dest_pose_1_3 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
+
+        # 控制移动
+        # move to the destination poses
+        self.__move_to_pose(dest_pose_1_1, 5)
+        time.sleep(2)
+        self.__grasp()
+        time.sleep(2)
+        self.__move_to_pose(dest_pose_1_2, 5)
+        time.sleep(2)
+        self.__move_to_pose(dest_pose_1_3, 5)
+        time.sleep(2)
+        self.__open()
+
+        # 回到初始位置
+        # move back to the starting pose
+        self.__move_to_pose(starting_pose, 3)
+
+    
+    def script_Cat_in_Box(self,toy_x,toy_y,box_x,box_y):
+        
+        #################################################填写
+        # 注意，是负值，单位是米
+        # 盒子的位置，桌子坐标系
+        # 标定点位置： -0.56 -0.51 0.66 -0.21
+        target_position_x_1_desk = box_x
+        target_position_y_1_desk = box_y
+        # 玩具的位置，桌子坐标系
+        object_position_x_1_desk = toy_x
+        object_position_y_1_desk = toy_y 
+        #################################################填写
+
+        # warm up the robot
+        self.__warm_up()
+
+        # get current pose
+        starting_pose = self.__get_tcp_pose()
+        print('starting_pose:', starting_pose)
+
+        #3个高度
+        z_middle_1 = 0.37
+        z_bottom_1 = 0.19
+        z_top_1 = 0.45
+        z_toptop = 0.4
+
+        #机器人坐标系和桌子坐标系之间的偏移
+        delta_x = 0.1595
+        delta_y = 0.1235
+
+        # 目标放置位置，机器人坐标系
+        target_position_x_1 = target_position_x_1_desk + delta_x
+        target_position_y_1 = target_position_y_1_desk + delta_y
+
+        # 目标抓取位置 ，机器人坐标系
+        object_position_x_1 = object_position_x_1_desk + delta_x
+        object_position_y_1 = object_position_y_1_desk + delta_y
+
+        # 目标位姿序列
+        # destination poses
+        fixed_rotation = starting_pose[3:]
+        dest_pose_1_0 = [object_position_x_1, object_position_y_1, z_top_1] + fixed_rotation
+        dest_pose_1_1 = [object_position_x_1, object_position_y_1, z_bottom_1] + fixed_rotation
+        dest_pose_1_2 = [object_position_x_1, object_position_y_1, z_top_1] + fixed_rotation
+        dest_pose_1_3 = [(object_position_x_1+target_position_x_1)/2, (object_position_y_1+target_position_y_1)/2, z_top_1] + fixed_rotation
+        dest_pose_1_4 = [target_position_x_1, target_position_y_1, z_top_1] + fixed_rotation
+
+        # 控制移动
+        # move to the destination poses
+        self.__move_to_pose(dest_pose_1_0, 5)
+        time.sleep(2)
+        self.__move_to_pose(dest_pose_1_1, 5)
+        time.sleep(2)
+        self.__grasp()
+        time.sleep(2)
+        self.__move_to_pose(dest_pose_1_2, 5)
+        time.sleep(2)
+        self.__move_to_pose(dest_pose_1_3, 5)
+        time.sleep(2)
+        self.__move_to_pose(dest_pose_1_4, 5)
+        time.sleep(2)
+        self.__open()
+        time.sleep(2)
+
+        # 回到初始位置
+        # move back to the starting pose
+        self.__move_to_pose(starting_pose, 3)
+
+
+    def Script_PenBox_GraspRotatePlace(self,toy_x,toy_y,box_x,box_y,rotate_mode):
+        
+        ####################### 传入参数 ##########################
+        # 注意，是负值，单位是米
+        # 盒子的位置，桌子坐标系
+        # 标定点位置： -0.56 -0.51 0.66 -0.21
+        target_position_x_1_desk = box_x
+        target_position_y_1_desk = box_y
+        # 玩具的位置，桌子坐标系
+        object_position_x_1_desk = toy_x
+        object_position_y_1_desk = toy_y 
+
+        ####################### 启动和初始位姿记录 ##########################
+        self.__warm_up()
+        # 当前位姿
+        # get current pose
+        starting_pose = self.__get_tcp_pose()
+        print('starting_pose:', starting_pose)
+
+        ####################### 常量 ##########################
+        #3个高度
+        z_middle_1 = 0.26
+        z_bottom_1 = 0.185
+        z_top_1 = 0.35
+        z_toptop = 0.4
+        #固定值
+        #机器人坐标系和桌子坐标系之间的偏移
+        delta_x = 0.1595
+        delta_y = 0.1235
+        # 可调整值：爪子长度
+        gripper_length = 0.16
+        # 可调整值：瓶子的抓握点下的高度
+        bottle_half_height = 0.09
+        # 可调整值：机械臂不可达的高度
+        unreachable_height = 0.24
+
+        # 固定的朝向值
+        x_neg = [1.369,-1.033,-1.392]
+        y_neg = [1.366,-1.062,0.999]
+        x_y_neg = [1.275,-0.900,-0.273]
+        x_60_y_30_neg = [1.246,-0.954,0.213]
+
+        # 后退距离
+        back_distance = 0.09
+
+        ####################### 坐标换算 ##########################
+        # 目标放置位置，机器人坐标系下
+        target_position_x_1 = target_position_x_1_desk + delta_x
+        target_position_y_1 = target_position_y_1_desk + delta_y
+
+        # 目标抓取位置 ，机器人坐标系下
+        object_position_x_1 = object_position_x_1_desk + delta_x
+        object_position_y_1 = object_position_y_1_desk + delta_y
+
+        ####################### 旋转 ##########################
+        # 初始位姿的旋转
+        fixed_rotation = starting_pose[3:]
+
+        # 旋转模式
+        # 1:瓶子朝向x- 2:瓶子朝向y- 
+        if rotate_mode == 1:
+            target_rotation = x_neg
+        elif rotate_mode == 2:
+            target_rotation = y_neg
+        elif rotate_mode == 3:
+            target_rotation = x_y_neg
+        elif rotate_mode == 4:
+            target_rotation = x_60_y_30_neg
+
+        ####################### 爪子长度导致的平面偏置 ##########################
+        if rotate_mode == 1:
+            target_position_x_1 = target_position_x_1+gripper_length
+        elif rotate_mode == 2:
+            target_position_y_1 = target_position_y_1+gripper_length
+        elif rotate_mode == 3:
+            # 除以根号2
+            target_position_x_1 = target_position_x_1+gripper_length/np.sqrt(2)
+            target_position_y_1 = target_position_y_1+gripper_length/np.sqrt(2)
+        elif rotate_mode == 4:
+            target_position_x_1 = target_position_x_1+gripper_length/2
+            target_position_y_1 = target_position_y_1+gripper_length*np.sqrt(3)/2
+
+        ####################### 后退 ##########################
+        # 后退距离
+        # 放完瓶子后，后退，避免碰到瓶子
+        if rotate_mode == 1:
+            target_position_x_1_after_back = target_position_x_1+back_distance
+            target_position_y_1_after_back = target_position_y_1
+        elif rotate_mode == 2:
+            target_position_x_1_after_back = target_position_x_1
+            target_position_y_1_after_back = target_position_y_1+back_distance
+        elif rotate_mode == 3:
+            target_position_x_1_after_back = target_position_x_1+back_distance/np.sqrt(2)
+            target_position_y_1_after_back = target_position_y_1+back_distance/np.sqrt(2)
+        elif rotate_mode == 4:
+            target_position_x_1_after_back = target_position_x_1+back_distance/2
+            target_position_y_1_after_back = target_position_y_1+back_distance*np.sqrt(3)/2
+
+        ####################### 动作序列 ##########################
+        # destination poses
+        dest_pose_1_1 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_2 = [object_position_x_1, object_position_y_1, z_bottom_1] + fixed_rotation
+        dest_pose_1_3 = [object_position_x_1, object_position_y_1, z_middle_1] + fixed_rotation
+        dest_pose_1_4 = [target_position_x_1, target_position_y_1, z_top_1] + target_rotation
+        dest_pose_1_5 = [target_position_x_1, target_position_y_1, unreachable_height] + target_rotation
+        dest_pose_1_6 = [target_position_x_1_after_back, target_position_y_1_after_back, unreachable_height] + target_rotation
+        dest_pose_1_7 = [target_position_x_1_after_back, target_position_y_1_after_back, z_top_1] + fixed_rotation
+
+        ####################### 控制移动 ##########################
+        # move to the destination poses
+        self.__move_to_pose(dest_pose_1_1, 10)
+        self.__move_to_pose(dest_pose_1_2, 5)
+        self.__grasp()
+        self.__move_to_pose(dest_pose_1_3, 5)
+        self.__move_to_pose(dest_pose_1_4, 20)
+        self.__move_to_pose(dest_pose_1_5, 10)
+        self.__open()
+        # self.__move_to_pose(dest_pose_1_6, 5)
+        # self.__move_to_pose(dest_pose_1_7, 10)
+        # 回到初始位置
+        # move back to the starting pose
+        self.__move_to_pose(starting_pose, 5)
+
 
 
 
